@@ -38,21 +38,28 @@ void imageCallback2(const sensor_msgs::msg::Image::ConstSharedPtr & msg)
   sleep(10);
   RCLCPP_INFO(logger, "Hello there !");
 }
+
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   rclcpp::NodeOptions options;
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("image_listener", options);
-  auto cb_group = node->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+
+  auto cb_group = node->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+  rclcpp::SubscriptionOptions sub_options;
+  sub_options.callback_group = cb_group;
+
+  rclcpp::executors::MultiThreadedExecutor executor;
+  executor.add_node(node);
 
   cv::namedWindow("view");
   cv::startWindowThread();
   image_transport::ImageTransport it(node);
 
-  image_transport::Subscriber sub = it.subscribe("camera/image", 1, imageCallback, cb_group);
-  image_transport::Subscriber sub2 = it.subscribe("camera/image", 1, imageCallback2, cb_group);
+  auto sub = image_transport::create_subscription(node.get(), "camera/image", imageCallback, "raw", rmw_qos_profile_default , sub_options);
+  auto sub2 = image_transport::create_subscription(node.get(), "camera/image", imageCallback2, "raw", rmw_qos_profile_default , sub_options);
 
-  rclcpp::spin(node);
+  executor.spin();
   cv::destroyWindow("view");
 
   return 0;
