@@ -21,9 +21,3 @@ In terminal 2 :
 ./build/my_subscriber
 ```
 
-Work in progress :
-This should run the 2 callbacks that are mutually exclusive in the selected callback queue. By default these are mutually exclusive, so the sleep() in
-the second callback blocks the execution of the original callback.
-
-Changing the group type to reentrant and changing the executor to multithreaded should fix the issue. (Need to test this)
-
