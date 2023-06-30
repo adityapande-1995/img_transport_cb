@@ -56,8 +56,10 @@ int main(int argc, char ** argv)
   cv::startWindowThread();
   image_transport::ImageTransport it(node);
 
-  auto sub = image_transport::create_subscription(node.get(), "camera/image", imageCallback, "raw", rmw_qos_profile_default , sub_options);
-  auto sub2 = image_transport::create_subscription(node.get(), "camera/image", imageCallback2, "raw", rmw_qos_profile_default , sub_options);
+  // auto sub = image_transport::create_subscription(node.get(), "camera/image", imageCallback, "raw", rmw_qos_profile_default , sub_options);
+  auto sub = it.subscribe("camera/image", 1, imageCallback, nullptr, sub_options);
+  // auto sub2 = image_transport::create_subscription(node.get(), "camera/image", imageCallback2, "raw", rmw_qos_profile_default , sub_options);
+  auto sub2 = it.subscribe("camera/image", 1, imageCallback2, nullptr, sub_options);
 
   executor.spin();
   cv::destroyWindow("view");
